@@ -5,6 +5,8 @@ measure theories. No claims are made about unifying physics; these are for visua
 
 1. anttis-string-theory.html (Web-Based Visualization)
 
+![Antti's String Theory](anttis-string-theory.png)
+
 # Description
 An interactive HTML/WebGL page that simulates a brane-world scenario. It visualizes how smooth 1D string vibrations
 project into 3D fields, showing emergent structures like spheres and toroids. Includes sliders for parameters (e.g.,
@@ -24,6 +26,8 @@ Use buttons like "Reset" or "Capture" for control.
 Monitor the analysis panel for metrics like time, energy, and particle count.
 
 # braneworld2.py (Python Script)
+
+[![Preview](preview.webp)](preview.webp)
 
 Description
 A Python script that models an enhanced brane-world simulation. It evolves a 1D complex string field under tension 

@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Enhanced WebGL Brane-World: Full 3D Quantum Structures</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 10px;
+            background: linear-gradient(45deg, #000011, #001122);
+            color: #fff;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 15px;
+            height: 100vh;
+        }
+        
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            background: linear-gradient(90deg, #0a4d68, #0a6847);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+        }
+        
+        .canvas-container {
+            position: relative;
+            flex: 1;
+            background: radial-gradient(circle at center, #001122, #000000);
+            border: 3px solid #0ff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5), inset 0 0 30px rgba(0,100,100,0.2);
+        }
+        
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        .overlay {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            max-width: 350px;
+            border: 1px solid #0ff;
+            backdrop-filter: blur(5px);
+        }
+        
+        .controls {
+            background: linear-gradient(135deg, #222233, #334455);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,20,30,0.5);
+            border-radius: 8px;
+            border: 1px solid #044;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #0ff;
+            font-weight: bold;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 25px;
+            background: #111;
+            border-radius: 15px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #0ff, #0af);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+        
+        .value-display {
+            min-width: 70px;
+            text-align: right;
+            font-size: 11px;
+            color: #0f0;
+            background: #002200;
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid #0f0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            background: linear-gradient(45deg, #003366, #006633);
+            color: #fff;
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #0066aa, #00aa66);
+            box-shadow: 0 0 15px rgba(0,255,255,0.5);
+            transform: translateY(-2px);
+        }
+        
+        button.active {
+            background: linear-gradient(45deg, #0a5c2b, #0a8c4b);
+            border-color: #0f0;
+            box-shadow: 0 0 20px rgba(0,255,0,0.5);
+        }
+        
+        .analysis {
+            background: rgba(0,10,20,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #0ff;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .status-running { background: #0f0; }
+        .status-paused { background: #ff0; }
+        .status-overflow { background: #f00; }
+        
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            height: 200px;
+        }
+        
+        .chart {
+            background: linear-gradient(135deg, #001122, #002211);
+            border: 2px solid #0ff;
+            border-radius: 8px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,255,255,0.3);
+        }
+        
+        .highlight { color: #0ff; font-weight: bold; }
+        .warning { color: #ff0; font-weight: bold; }
+        .error { color: #f00; font-weight: bold; }
+        .success { color: #0f0; font-weight: bold; }
+        
+        .quantum-effect {
+            animation: quantumGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes quantumGlow {
+            0%, 100% { text-shadow: 0 0 5px #0ff; }
+            50% { text-shadow: 0 0 20px #0ff, 0 0 30px #0af; }
+        }
+        
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .mode-btn {
+            padding: 8px;
+            margin: 2px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-panel">
+            <div class="header">
+                <h1 class="quantum-effect">🌌 Enhanced WebGL Brane-World</h1>
+                <p>1D Strings → 3D Quantum Reality with Full Geometric Structures</p>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="mainCanvas"></canvas>
+                <div class="overlay" id="statusOverlay">
+                    <div id="systemStatus">🔄 Initializing Enhanced WebGL...</div>
+                    <div id="realTimeStats"></div>
+                    <div id="quantumEvents"></div>
+                </div>
+            </div>
+            
+            <div class="charts-container">
+                <canvas id="stringChart" class="chart"></canvas>
+                <canvas id="particleChart" class="chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <button id="toggleBtn">▶️ Start Quantum Evolution</button>
+                <div class="mode-selector">
+                    <button id="resetBtn" class="mode-btn">🔄 Reset</button>
+                    <button id="screenshotBtn" class="mode-btn">📸 Capture</button>
+                    <button id="presetBtn" class="mode-btn">🎲 Random</button>
+                    <button id="bellBtn" class="mode-btn">⚛️ Bell State</button>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>🎵 String Tension (Quantum Stiffness)</label>
+                <div class="slider-container">
+                    <input type="range" id="tensionSlider" min="0.1" max="8.0" step="0.1" value="2.5">
+                    <span class="value-display" id="tensionValue">2.5</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>🌍 Compactification Radius</label>
+                <div class="slider-container">
+                    <input type="range" id="radiusSlider" min="1.0" max="12.0" step="0.2" value="4.0">
+                    <span class="value-display" id="radiusValue">4.0</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>⚡ Evolution Speed</label>
+                <div class="slider-container">
+                    <input type="range" id="speedSlider" min="0.1" max="5.0" step="0.1" value="1.2">
+                    <span class="value-display" id="speedValue">1.2</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>🎨 Visualization Mode</label>
+                <button id="modeBtn" data-mode="0">Quantum Particles</button>
+            </div>
+            
+            <div class="control-group">
+                <label>🎛️ Quantum Parameters</label>
+                <div class="slider-container">
+                    <span style="font-size: 10px;">Threshold:</span>
+                    <input type="range" id="thresholdSlider" min="0.1" max="1.0" step="0.05" value="0.4">
+                    <span class="value-display" id="thresholdValue">0.4</span>
+                </div>
+                <div class="slider-container">
+                    <span style="font-size: 10px;">Harmonics:</span>
+                    <input type="range" id="harmonicsSlider" min="2" max="8" step="1" value="5">
+                    <span class="value-display" id="harmonicsValue">5</span>
+                </div>
+            </div>
+            
+            <div class="analysis" id="liveAnalysis">
+                <div class="highlight quantum-effect">🧬 DIMENSIONAL PROJECTION ANALYSIS</div>
+                <div>⏰ Time: <span id="timeDisplay" class="success">0.000</span>s</div>
+                <div>🎵 String Energy: <span id="stringEnergyDisplay">0</span></div>
+                <div>⚛️ 3D Particles: <span id="particleCountDisplay">0</span></div>
+                <div>🌀 Tunneling Events: <span id="tunnelingDisplay">0</span></div>
+                <div>🔄 Phase Transitions: <span id="phaseDisplay">0</span></div>
+                <div>🎯 Sphere Events: <span id="sphereDisplay">0</span></div>
+                <div>🍩 Toroid Events: <span id="toroidDisplay">0</span></div>
+                <div id="specialEvents"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class EnhancedBraneWorldWebGL {
+            constructor() {
+                this.canvas = document.getElementById('mainCanvas');
+                this.gl = this.canvas.getContext('webgl2');
+                
+                if (!this.gl) {
+                    alert('WebGL2 not supported - need modern browser for quantum magic!');
+                    return;
+                }
+                
+                // Enhanced simulation parameters
+                this.stringSize = 128;
+                this.projSize = 48; // Smaller for better performance with complex structures
+                this.time = 0.0;
+                this.dt = 0.008;
+                this.isRunning = false;
+                
+                // Physics parameters
+                this.stringTension = 2.5;
+                this.compactRadius = 4.0;
+                this.evolutionSpeed = 1.2;
+                this.quantumThreshold = 0.4;
+                this.numHarmonics = 5;
+                
+                // String field arrays (complex field)
+                this.stringField = new Float32Array(this.stringSize * 2); // Real, Imaginary
+                this.stringFieldPrev = new Float32Array(this.stringSize * 2);
+                
+                // 3D projection field
+                this.projField3D = new Float32Array(this.projSize * this.projSize * this.projSize);
+                
+                // Analysis data
+                this.stringComHistory = [];
+                this.particleHistory = [];
+                this.energyHistory = [];
+                this.tunnelingEvents = 0;
+                this.phaseTransitions = 0;
+                this.sphereEvents = 0;
+                this.toroidEvents = 0;
+                
+                // Camera parameters
+                this.cameraAngle = 0;
+                this.cameraRadius = 5.0;
+                this.cameraHeight = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupGL();
+                this.createShaders();
+                this.createBuffers();
+                this.setupEventListeners();
+                this.initializeStringField();
+                this.resize();
+                this.updateStatus('🚀 Enhanced Brane-World Ready for Quantum Magic!');
+            }
+            
+            setupGL() {
+                const gl = this.gl;
+                gl.enable(gl.DEPTH_TEST);
+                gl.enable(gl.BLEND);
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                gl.clearColor(0.0, 0.0, 0.1, 1.0);
+                gl.depthFunc(gl.LEQUAL);
+            }
+            
+            createShaders() {
+                const gl = this.gl;
+                
+                // Enhanced vertex shader with quantum effects
+                const vertexShaderSource = `#version 300 es
+                    in vec3 a_position;
+                    in float a_intensity;
+                    in vec3 a_color;
+                    
+                    uniform mat4 u_viewMatrix;
+                    uniform mat4 u_projMatrix;
+                    uniform float u_time;
+                    uniform float u_pointSize;
+                    
+                    out float v_intensity;
+                    out vec3 v_worldPos;
+                    out vec3 v_color;
+                    
+                    void main() {
+                        v_intensity = a_intensity;
+                        v_worldPos = a_position;
+                        v_color = a_color;
+                        
+                        // Quantum field oscillations
+                        vec3 pos = a_position;
+                        float r = length(pos);
+                        
+                        // Add geometric breathing effect
+                        float breathe = sin(u_time * 2.0 + r * 8.0) * 0.05 * a_intensity;
+                        pos *= (1.0 + breathe);
+                        
+                        // Add quantum uncertainty jitter
+                        float jitter = sin(u_time * 20.0 + r * 50.0) * 0.01 * a_intensity;
+                        pos.y += jitter;
+                        
+                        gl_Position = u_projMatrix * u_viewMatrix * vec4(pos, 1.0);
+                        
+                        // Dynamic point size based on intensity and distance
+                        float distance = length(gl_Position.xyz);
+                        gl_PointSize = u_pointSize * (0.3 + a_intensity * 2.0) * (10.0 / (distance + 5.0));
+                    }
+                `;
+                
+                // Enhanced fragment shader with advanced quantum effects
+                const fragmentShaderSource = `#version 300 es
+                    precision highp float;
+                    
+                    in float v_intensity;
+                    in vec3 v_worldPos;
+                    in vec3 v_color;
+                    
+                    uniform float u_time;
+                    uniform vec3 u_viewPos;
+                    
+                    out vec4 fragColor;
+                    
+                    void main() {
+                        // Advanced circular particle with quantum effects
+                        vec2 coord = gl_PointCoord - 0.5;
+                        float dist = length(coord);
+                        if (dist > 0.5) discard;
+                        
+                        // Multi-layer quantum glow
+                        float innerGlow = 1.0 - smoothstep(0.0, 0.3, dist);
+                        float outerGlow = 1.0 - smoothstep(0.3, 0.5, dist);
+                        float totalGlow = innerGlow * 0.8 + outerGlow * 0.3;
+                        
+                        // Quantum interference patterns
+                        float interference = sin(dist * 30.0 + u_time * 10.0) * 0.1 + 0.9;
+                        totalGlow *= interference;
+                        
+                        // Enhanced color based on intensity and quantum state
+                        vec3 color = v_color;
+                        
+                        // Quantum state color mapping
+                        if (v_intensity > 0.9) {
+                            // Excited quantum states - bright cyan/white
+                            color = mix(color, vec3(0.5, 1.0, 1.0), 0.6);
+                        } else if (v_intensity > 0.6) {
+                            // Medium energy states - purple/blue
+                            color = mix(color, vec3(0.8, 0.4, 1.0), 0.4);
+                        }
+                        
+                        // Add quantum tunneling flicker
+                        float tunnelFlicker = step(0.98, sin(u_time * 50.0 + v_intensity * 200.0));
+                        color += vec3(1.0, 1.0, 0.0) * tunnelFlicker * 0.8;
+                        
+                        // Temporal quantum shimmer
+                        float shimmer = sin(u_time * 15.0 + length(v_worldPos) * 25.0) * 0.15 + 0.85;
+                        color *= shimmer;
+                        
+                        // Phase transition glow
+                        float r = length(v_worldPos);
+                        float phaseGlow = exp(-abs(r - 1.0) * 5.0) * sin(u_time * 8.0) * 0.3;
+                        color += vec3(0.0, 1.0, 0.5) * phaseGlow;
+                        
+                        // Final quantum alpha
+                        float alpha = totalGlow * v_intensity * (0.6 + 0.4 * sin(u_time * 3.0));
+                        
+                        fragColor = vec4(color * totalGlow, alpha);
+                    }
+                `;
+                
+                this.renderProgram = this.createProgram(vertexShaderSource, fragmentShaderSource);
+                
+                // Get uniform and attribute locations
+                this.uniforms = {
+                    viewMatrix: this.gl.getUniformLocation(this.renderProgram, 'u_viewMatrix'),
+                    projMatrix: this.gl.getUniformLocation(this.renderProgram, 'u_projMatrix'),
+                    time: this.gl.getUniformLocation(this.renderProgram, 'u_time'),
+                    pointSize: this.gl.getUniformLocation(this.renderProgram, 'u_pointSize')
+                };
+                
+                this.attributes = {
+                    position: this.gl.getAttribLocation(this.renderProgram, 'a_position'),
+                    intensity: this.gl.getAttribLocation(this.renderProgram, 'a_intensity'),
+                    color: this.gl.getAttribLocation(this.renderProgram, 'a_color')
+                };
+            }
+            
+            createProgram(vertexSource, fragmentSource) {
+                const gl = this.gl;
+                
+                const vertexShader = this.createShader(gl.VERTEX_SHADER, vertexSource);
+                const fragmentShader = this.createShader(gl.FRAGMENT_SHADER, fragmentSource);
+                
+                const program = gl.createProgram();
+                gl.attachShader(program, vertexShader);
+                gl.attachShader(program, fragmentShader);
+                gl.linkProgram(program);
+                
+                if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                    console.error('Program link error:', gl.getProgramInfoLog(program));
+                    return null;
+                }
+                
+                return program;
+            }
+            
+            createShader(type, source) {
+                const gl = this.gl;
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                    return null;
+                }
+                
+                return shader;
+            }
+            
+            createBuffers() {
+                const gl = this.gl;
+                
+                // Create 3D grid positions
+                const positions = [];
+                const intensities = [];
+                const colors = [];
+                
+                for (let i = 0; i < this.projSize; i++) {
+                    for (let j = 0; j < this.projSize; j++) {
+                        for (let k = 0; k < this.projSize; k++) {
+                            // Map to spherical coordinates for better quantum structures
+                            const x = (i / (this.projSize - 1)) * 2.0 - 1.0;
+                            const y = (j / (this.projSize - 1)) * 2.0 - 1.0;
+                            const z = (k / (this.projSize - 1)) * 2.0 - 1.0;
+                            
+                            positions.push(x, y, z);
+                            intensities.push(0.0);
+                            
+                            // Initial color based on position
+                            const r = Math.sqrt(x*x + y*y + z*z);
+                            colors.push(
+                                0.3 + 0.7 * Math.sin(r * 3.0),
+                                0.5 + 0.5 * Math.cos(r * 2.0),
+                                0.7 + 0.3 * Math.sin(r * 5.0)
+                            );
+                        }
+                    }
+                }
+                
+                this.particleCount = positions.length / 3;
+                
+                // Create buffers
+                this.positionBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+                
+                this.intensityBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.intensityBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(intensities), gl.DYNAMIC_DRAW);
+                
+                this.colorBuffer = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+                
+                // Store positions for CPU access
+                this.positions = positions;
+                
+                // Create VAO
+                this.vao = gl.createVertexArray();
+                gl.bindVertexArray(this.vao);
+                
+                // Setup attributes
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+                gl.enableVertexAttribArray(this.attributes.position);
+                gl.vertexAttribPointer(this.attributes.position, 3, gl.FLOAT, false, 0, 0);
+                
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.intensityBuffer);
+                gl.enableVertexAttribArray(this.attributes.intensity);
+                gl.vertexAttribPointer(this.attributes.intensity, 1, gl.FLOAT, false, 0, 0);
+                
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+                gl.enableVertexAttribArray(this.attributes.color);
+                gl.vertexAttribPointer(this.attributes.color, 3, gl.FLOAT, false, 0, 0);
+                
+                gl.bindVertexArray(null);
+            }
+            
+            initializeStringField() {
+                // Initialize complex string field with multiple resonant modes
+                for (let i = 0; i < this.stringSize; i++) {
+                    const x = (i / this.stringSize) * 2.0 * Math.PI;
+                    
+                    let real = 0, imag = 0;
+                    
+                    // Multiple harmonic modes for rich interference
+                    for (let mode = 1; mode <= this.numHarmonics; mode++) {
+                        const amplitude = 1.0 / Math.sqrt(mode); // Natural harmonic decay
+                        const phase = Math.random() * 2 * Math.PI; // Random phases for complexity
+                        
+                        real += amplitude * Math.sin(mode * x + phase);
+                        imag += amplitude * Math.cos(mode * x + phase + Math.PI/4);
+                    }
+                    
+                    // Add small random perturbation for symmetry breaking
+                    real += (Math.random() - 0.5) * 0.2;
+                    imag += (Math.random() - 0.5) * 0.2;
+                    
+                    this.stringField[i * 2] = real;
+                    this.stringField[i * 2 + 1] = imag;
+                    this.stringFieldPrev[i * 2] = real;
+                    this.stringFieldPrev[i * 2 + 1] = imag;
+                }
+            }
+            
+            evolveStringField() {
+                const dx = (2.0 * Math.PI) / this.stringSize;
+                const dt2 = this.dt * this.dt;
+                
+                // Temporary array for new field
+                const newField = new Float32Array(this.stringSize * 2);
+                
+                for (let i = 0; i < this.stringSize; i++) {
+                    const idx = i * 2;
+                    
+                    // Current values
+                    const real = this.stringField[idx];
+                    const imag = this.stringField[idx + 1];
+                    const realPrev = this.stringFieldPrev[idx];
+                    const imagPrev = this.stringFieldPrev[idx + 1];
+                    
+                    // Periodic boundary conditions
+                    const iLeft = ((i - 1 + this.stringSize) % this.stringSize) * 2;
+                    const iRight = ((i + 1) % this.stringSize) * 2;
+                    
+                    // Spatial derivatives (Laplacian)
+                    const realLaplacian = (this.stringField[iLeft] - 2*real + this.stringField[iRight]) / (dx*dx);
+                    const imagLaplacian = (this.stringField[iLeft+1] - 2*imag + this.stringField[iRight+1]) / (dx*dx);
+                    
+                    // Tension force
+                    const tensionReal = this.stringTension * realLaplacian;
+                    const tensionImag = this.stringTension * imagLaplacian;
+                    
+                    // Nonlinear potential for stable structures
+                    const amplitude2 = real*real + imag*imag;
+                    const potentialReal = -0.1 * real + 0.05 * amplitude2 * real;
+                    const potentialImag = -0.1 * imag + 0.05 * amplitude2 * imag;
+                    
+                    // Driving force (multiple frequencies)
+                    const x = (i / this.stringSize) * 2.0 * Math.PI;
+                    let driveReal = 0, driveImag = 0;
+                    
+                    for (let mode = 1; mode <= 3; mode++) {
+                        const freq = mode * (1.0 + 0.1 * Math.sin(this.time * 0.2));
+                        const driveAmp = 0.02 / mode;
+                        driveReal += driveAmp * Math.sin(freq * this.time + mode * x);
+                        driveImag += driveAmp * Math.cos(freq * this.time + mode * x);
+                    }
+                    
+                    // Total force
+                    const forceReal = tensionReal + potentialReal + driveReal;
+                    const forceImag = tensionImag + potentialImag + driveImag;
+                    
+                    // Verlet integration
+                    newField[idx] = 2*real - realPrev + dt2 * forceReal;
+                    newField[idx+1] = 2*imag - imagPrev + dt2 * forceImag;
+                    
+                    // Energy regulation
+                    const newAmp2 = newField[idx]*newField[idx] + newField[idx+1]*newField[idx+1];
+                    const maxAmp2 = 25.0; // Prevent overflow
+                    if (newAmp2 > maxAmp2) {
+                        const scale = Math.sqrt(maxAmp2 / newAmp2);
+                        newField[idx] *= scale;
+                        newField[idx+1] *= scale;
+                        
+                        // Record phase transition
+                        if (Math.random() < 0.1) {
+                            this.phaseTransitions++;
+                        }
+                    }
+                }
+                
+                // Update field arrays
+                this.stringFieldPrev.set(this.stringField);
+                this.stringField.set(newField);
+            }
+            
+            project3D() {
+                const gl = this.gl;
+                
+                // Calculate center of mass for string field
+                let comReal = 0, comImag = 0, totalAmp = 0;
+                for (let i = 0; i < this.stringSize; i++) {
+                    const real = this.stringField[i * 2];
+                    const imag = this.stringField[i * 2 + 1];
+                    const amp = Math.sqrt(real*real + imag*imag);
+                    const pos = (i / this.stringSize) * 2.0 * Math.PI;
+                    
+                    comReal += pos * amp;
+                    totalAmp += amp;
+                }
+                
+                const stringCom = totalAmp > 0 ? comReal / totalAmp : 0;
+                this.stringComHistory.push(stringCom);
+                
+                // FIXED: More selective 3D projection for discrete structures
+                const intensities = new Float32Array(this.particleCount);
+                const colors = new Float32Array(this.particleCount * 3);
+                let particleCount = 0;
+                let sphericalStructures = 0;
+                let toroidalStructures = 0;
+                
+                // Find dominant string modes first
+                let dominantModes = [];
+                for (let mode = 1; mode <= this.numHarmonics; mode++) {
+                    let modeEnergy = 0;
+                    for (let i = 0; i < this.stringSize; i++) {
+                        const x = (i / this.stringSize) * 2.0 * Math.PI;
+                        const real = this.stringField[i * 2];
+                        const imag = this.stringField[i * 2 + 1];
+                        const modeContrib = real * Math.sin(mode * x) + imag * Math.cos(mode * x);
+                        modeEnergy += modeContrib * modeContrib;
+                    }
+                    dominantModes.push({mode, energy: modeEnergy});
+                }
+                dominantModes.sort((a, b) => b.energy - a.energy);
+                
+                // Only use top 2-3 dominant modes for projection
+                const activeModes = dominantModes.slice(0, Math.min(3, this.numHarmonics));
+                
+                
+                for (let i = 0; i < this.particleCount; i++) {
+                    const idx = i * 3;
+                    const x = this.positions[idx];
+                    const y = this.positions[idx + 1];
+                    const z = this.positions[idx + 2];
+                    
+                    // Spherical coordinates
+                    const r = Math.sqrt(x*x + y*y + z*z);
+                    const theta = Math.atan2(y, x);
+                    const phi = Math.acos(z / (r + 0.001));
+                    
+                    let intensity = 0;
+                    let colorR = 0.2, colorG = 0.5, colorB = 0.8;
+                    
+                    // FIXED: Create distinct geometric structures based on dominant modes
+                    const currentPhase = this.time * 0.5;
+                    const structureType = Math.floor(currentPhase) % 3; // Cycle through structure types
+                    
+                    if (structureType === 0) {
+                        // SPHERICAL ATOMS - only near specific radii
+                        const targetRadii = [0.4, 0.7, 1.0]; // Quantized shells
+                        for (let shell of targetRadii) {
+                            const shellDistance = Math.abs(r - shell);
+                            if (shellDistance < 0.15) { // Thin shell
+                                // Use only strongest mode for clean structure
+                                const strongestMode = activeModes[0];
+                                if (strongestMode.energy > 10) { // Only if mode is strong enough
+                                    const stringIdx = Math.floor((theta / (2*Math.PI)) * this.stringSize) % this.stringSize;
+                                    const real = this.stringField[stringIdx * 2];
+                                    const imag = this.stringField[stringIdx * 2 + 1];
+                                    
+                                    const shellDecay = Math.exp(-shellDistance * 20); // Sharp shell
+                                    intensity += (real * Math.cos(strongestMode.mode * theta) + 
+                                                imag * Math.sin(strongestMode.mode * theta)) * shellDecay;
+                                    
+                                    colorR = 0.3 + shell * 0.5;
+                                    colorG = 0.8;
+                                    colorB = 1.0 - shell * 0.3;
+                                }
+                            }
+                        }
+                        
+                    } else if (structureType === 1) {
+                        // TOROIDAL STRUCTURES - donut shapes
+                        const toroidMajorR = 0.6;
+                        const toroidMinorR = 0.2;
+                        const cylR = Math.sqrt(x*x + y*y);
+                        const toroidDist = Math.sqrt((cylR - toroidMajorR)*(cylR - toroidMajorR) + z*z);
+                        
+                        if (toroidDist < toroidMinorR) {
+                            const strongestMode = activeModes[0];
+                            if (strongestMode.energy > 15) {
+                                const stringIdx = Math.floor((theta / (2*Math.PI)) * this.stringSize) % this.stringSize;
+                                const real = this.stringField[stringIdx * 2];
+                                const imag = this.stringField[stringIdx * 2 + 1];
+                                
+                                const toroidDecay = Math.exp(-toroidDist * 15);
+                                intensity += (real * Math.sin(strongestMode.mode * theta * 2) + 
+                                            imag * Math.cos(strongestMode.mode * theta * 2)) * toroidDecay;
+                                
+                                colorR = 1.0;
+                                colorG = 0.5 + 0.3 * Math.sin(theta * 4);
+                                colorB = 0.3;
+                            }
+                        }
+                        
+                    } else {
+                        // CYLINDRICAL/TUBE STRUCTURES
+                        const cylRadius = Math.sqrt(x*x + y*y);
+                        const targetCylR = 0.5;
+                        const cylDistance = Math.abs(cylRadius - targetCylR);
+                        
+                        if (cylDistance < 0.1 && Math.abs(z) < 0.4) {
+                            const strongestMode = activeModes[0];
+                            if (strongestMode.energy > 12) {
+                                const stringIdx = Math.floor(((z + 1) / 2) * this.stringSize) % this.stringSize;
+                                const real = this.stringField[stringIdx * 2];
+                                const imag = this.stringField[stringIdx * 2 + 1];
+                                
+                                const cylDecay = Math.exp(-cylDistance * 30) * Math.exp(-z*z * 2);
+                                intensity += (real + imag) * 0.5 * cylDecay;
+                                
+                                colorR = 0.2;
+                                colorG = 0.8 + 0.2 * Math.sin(z * 8);
+                                colorB = 0.6;
+                            }
+                        }
+                    }
+                    
+                    // Add temporal breathing effect
+                    const breathingPhase = Math.sin(this.time * 3.0 + r * 5.0) * 0.1 + 0.9;
+                    intensity *= breathingPhase;
+                    
+                    // MUCH MORE SELECTIVE THRESHOLD - creates discrete jumps
+                    const dynamicThreshold = this.quantumThreshold * (1.5 + 0.5 * Math.sin(this.time * 2.0));
+                    
+                    if (Math.abs(intensity) > dynamicThreshold) {
+                        // Sharp quantization - fewer levels
+                        const levels = [0.8, 1.5, 2.2];
+                        const levelIndex = Math.min(Math.floor(Math.abs(intensity) * 1.5), levels.length - 1);
+                        
+                        // Quantum tunneling - much lower probability for cleaner structures
+                        const tunnelProb = 0.02 * (1 + Math.sin(this.time * 40.0 + r * 60.0));
+                        if (Math.random() < tunnelProb) {
+                            intensity = Math.sign(intensity) * levels[levelIndex];
+                            this.tunnelingEvents++;
+                            
+                            // Add tunneling flash
+                            colorR = Math.min(1, colorR + 0.5);
+                            colorG = Math.min(1, colorG + 0.3);
+                        }
+                        
+                        particleCount++;
+                        
+                        // Structure counting - more selective
+                        if (structureType === 0 && Math.abs(intensity) > 1.0) sphericalStructures++;
+                        if (structureType === 1 && Math.abs(intensity) > 1.2) toroidalStructures++;
+                        
+                    } else {
+                        intensity = 0; // Hard cutoff for clean structures
+                    }
+                    
+                    intensities[i] = Math.abs(intensity);
+                    colors[i * 3] = Math.min(1, colorR);
+                    colors[i * 3 + 1] = Math.min(1, colorG);
+                    colors[i * 3 + 2] = Math.min(1, colorB);
+                }
+                
+                // Update particle history and detect events
+                this.particleHistory.push(particleCount);
+                
+                if (sphericalStructures > 20) this.sphereEvents++;
+                if (toroidalStructures > 15) this.toroidEvents++;
+                
+                // Update GPU buffers
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.intensityBuffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, intensities);
+                
+                gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, colors);
+                
+                // Calculate energy
+                let stringEnergy = 0;
+                for (let i = 0; i < this.stringSize; i++) {
+                    const real = this.stringField[i * 2];
+                    const imag = this.stringField[i * 2 + 1];
+                    stringEnergy += real*real + imag*imag;
+                }
+                this.energyHistory.push(stringEnergy);
+                
+                // Maintain history length
+                const maxHistory = 500;
+                [this.stringComHistory, this.particleHistory, this.energyHistory].forEach(arr => {
+                    if (arr.length > maxHistory) arr.shift();
+                });
+            }
+            
+            render() {
+                const gl = this.gl;
+                
+                gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+                
+                // Use render program
+                gl.useProgram(this.renderProgram);
+                
+                // Update camera
+                this.cameraAngle += 0.005;
+                this.cameraHeight = Math.sin(this.time * 0.3) * 0.8;
+                
+                // Set up matrices
+                const viewMatrix = this.createViewMatrix();
+                const projMatrix = this.createProjectionMatrix();
+                
+                // Set uniforms
+                gl.uniformMatrix4fv(this.uniforms.viewMatrix, false, viewMatrix);
+                gl.uniformMatrix4fv(this.uniforms.projMatrix, false, projMatrix);
+                gl.uniform1f(this.uniforms.time, this.time);
+                gl.uniform1f(this.uniforms.pointSize, 12.0);
+                
+                // Render particles
+                gl.bindVertexArray(this.vao);
+                gl.drawArrays(gl.POINTS, 0, this.particleCount);
+                gl.bindVertexArray(null);
+            }
+            
+            createViewMatrix() {
+                const eye = [
+                    Math.cos(this.cameraAngle) * this.cameraRadius,
+                    this.cameraHeight,
+                    Math.sin(this.cameraAngle) * this.cameraRadius
+                ];
+                const center = [0, 0, 0];
+                const up = [0, 1, 0];
+                
+                return this.lookAt(eye, center, up);
+            }
+            
+            createProjectionMatrix() {
+                const aspect = this.canvas.width / this.canvas.height;
+                return this.perspective(50 * Math.PI / 180, aspect, 0.1, 100.0);
+            }
+            
+            // Matrix math utilities
+            lookAt(eye, center, up) {
+                const f = this.normalize(this.subtract(center, eye));
+                const s = this.normalize(this.cross(f, up));
+                const u = this.cross(s, f);
+                
+                return new Float32Array([
+                    s[0], u[0], -f[0], 0,
+                    s[1], u[1], -f[1], 0,
+                    s[2], u[2], -f[2], 0,
+                    -this.dot(s, eye), -this.dot(u, eye), this.dot(f, eye), 1
+                ]);
+            }
+            
+            perspective(fovy, aspect, near, far) {
+                const f = 1.0 / Math.tan(fovy / 2);
+                const rangeInv = 1.0 / (near - far);
+                
+                return new Float32Array([
+                    f / aspect, 0, 0, 0,
+                    0, f, 0, 0,
+                    0, 0, (near + far) * rangeInv, -1,
+                    0, 0, near * far * rangeInv * 2, 0
+                ]);
+            }
+            
+            normalize(v) {
+                const len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+                return len > 0 ? [v[0]/len, v[1]/len, v[2]/len] : [0, 0, 0];
+            }
+            
+            subtract(a, b) {
+                return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+            }
+            
+            cross(a, b) {
+                return [
+                    a[1] * b[2] - a[2] * b[1],
+                    a[2] * b[0] - a[0] * b[2],
+                    a[0] * b[1] - a[1] * b[0]
+                ];
+            }
+            
+            dot(a, b) {
+                return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+            }
+            
+            step() {
+                if (!this.isRunning) return;
+                
+                this.evolveStringField();
+                this.project3D();
+                this.time += this.dt * this.evolutionSpeed;
+                
+                this.render();
+                this.updateUI();
+                
+                requestAnimationFrame(() => this.step());
+            }
+            
+            updateUI() {
+                document.getElementById('timeDisplay').textContent = this.time.toFixed(3);
+                document.getElementById('stringEnergyDisplay').textContent = 
+                    (this.energyHistory[this.energyHistory.length - 1] || 0).toFixed(1);
+                document.getElementById('particleCountDisplay').textContent = 
+                    this.particleHistory[this.particleHistory.length - 1] || 0;
+                document.getElementById('tunnelingDisplay').textContent = this.tunnelingEvents;
+                document.getElementById('phaseDisplay').textContent = this.phaseTransitions;
+                document.getElementById('sphereDisplay').textContent = this.sphereEvents;
+                document.getElementById('toroidDisplay').textContent = this.toroidEvents;
+                
+                // Special events detection
+                const events = [];
+                const recentParticles = this.particleHistory.slice(-10);
+                const avgParticles = recentParticles.reduce((a,b) => a+b, 0) / recentParticles.length;
+                
+                if (avgParticles > 50) events.push('<span class="highlight">🌟 High Particle Density</span>');
+                if (this.sphereEvents > this.toroidEvents + 5) events.push('<span class="success">🔮 Spherical Dominance</span>');
+                if (this.toroidEvents > this.sphereEvents + 3) events.push('<span class="warning">🍩 Toroidal Structures</span>');
+                if (this.phaseTransitions > 20) events.push('<span class="error">⚡ High Phase Activity</span>');
+                if (this.tunnelingEvents % 1000 < 50) events.push('<span class="quantum-effect">🌀 Tunneling Storm</span>');
+                
+                document.getElementById('specialEvents').innerHTML = events.join('<br>');
+                
+                this.updateCharts();
+            }
+            
+            updateCharts() {
+                this.drawStringChart();
+                this.drawParticleChart();
+            }
+            
+            drawStringChart() {
+                const canvas = document.getElementById('stringChart');
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth * 2;
+                canvas.height = canvas.offsetHeight * 2;
+                ctx.scale(2, 2);
+                
+                const width = canvas.offsetWidth;
+                const height = canvas.offsetHeight;
+                
+                // Clear with gradient background
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#001122');
+                gradient.addColorStop(1, '#000000');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                if (this.stringComHistory.length < 2) return;
+                
+                // Draw string COM evolution
+                ctx.strokeStyle = '#0ff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                const maxPoints = Math.min(200, this.stringComHistory.length);
+                const startIdx = this.stringComHistory.length - maxPoints;
+                const padding = 20;
+                
+                for (let i = 0; i < maxPoints; i++) {
+                    const x = padding + (i * (width - 2 * padding)) / (maxPoints - 1);
+                    const value = this.stringComHistory[startIdx + i];
+                    const y = height - padding - ((value % (2*Math.PI)) / (2*Math.PI)) * (height - 2 * padding);
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                
+                // Title and labels
+                ctx.fillStyle = '#0ff';
+                ctx.font = 'bold 12px Monaco';
+                ctx.fillText('String Center-of-Mass Evolution', 8, 18);
+                
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Monaco';
+                ctx.fillText('Smooth 1D Dynamics', 8, height - 8);
+            }
+            
+            drawParticleChart() {
+                const canvas = document.getElementById('particleChart');
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth * 2;
+                canvas.height = canvas.offsetHeight * 2;
+                ctx.scale(2, 2);
+                
+                const width = canvas.offsetWidth;
+                const height = canvas.offsetHeight;
+                
+                // Clear with gradient
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#112200');
+                gradient.addColorStop(1, '#000000');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                if (this.particleHistory.length < 2) return;
+                
+                const maxPoints = Math.min(100, this.particleHistory.length);
+                const startIdx = this.particleHistory.length - maxPoints;
+                const padding = 15;
+                const barWidth = (width - 2 * padding) / maxPoints;
+                
+                // Draw particle count bars with quantum effects
+                for (let i = 0; i < maxPoints; i++) {
+                    const x = padding + i * barWidth;
+                    const value = this.particleHistory[startIdx + i] || 0;
+                    const normalizedValue = Math.min(value / 100, 1.0);
+                    const barHeight = normalizedValue * (height - 2 * padding);
+                    const y = height - padding - barHeight;
+                    
+                    // Quantum-themed colors
+                    let color;
+                    if (value > 80) {
+                        color = `rgb(${255}, ${100 + Math.sin(this.time * 10) * 50}, 0)`; // Pulsing orange/red
+                    } else if (value > 40) {
+                        color = `rgb(${Math.sin(this.time * 5 + i * 0.1) * 100 + 155}, 255, 0)`; // Pulsing yellow
+                    } else if (value > 10) {
+                        color = `rgb(0, 255, ${Math.cos(this.time * 3 + i * 0.2) * 100 + 155})`; // Pulsing cyan
+                    } else {
+                        color = `rgb(0, ${100 + value * 10}, 255)`; // Blue spectrum
+                    }
+                    
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, y, Math.max(1, barWidth - 1), barHeight);
+                    
+                    // Add glow effect for high values
+                    if (value > 50) {
+                        ctx.shadowColor = color;
+                        ctx.shadowBlur = 5;
+                        ctx.fillRect(x, y, Math.max(1, barWidth - 1), barHeight);
+                        ctx.shadowBlur = 0;
+                    }
+                }
+                
+                // Title
+                ctx.fillStyle = '#0f0';
+                ctx.font = 'bold 12px Monaco';
+                ctx.fillText('3D Quantum Particle Count', 8, 18);
+                
+                ctx.fillStyle = '#666';
+                ctx.font = '10px Monaco';
+                ctx.fillText('Discrete 3D Emergence', 8, height - 8);
+            }
+            
+            setupEventListeners() {
+                // Start/pause button
+                document.getElementById('toggleBtn').addEventListener('click', () => {
+                    this.isRunning = !this.isRunning;
+                    const btn = document.getElementById('toggleBtn');
+                    if (this.isRunning) {
+                        btn.textContent = '⏸️ Pause Evolution';
+                        btn.classList.add('active');
+                        this.step();
+                        this.updateStatus('🚀 Quantum Evolution Active!');
+                    } else {
+                        btn.textContent = '▶️ Start Evolution';
+                        btn.classList.remove('active');
+                        this.updateStatus('⏸️ Evolution Paused');
+                    }
+                });
+                
+                // Reset button
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.reset();
+                });
+                
+                // Screenshot button
+                document.getElementById('screenshotBtn').addEventListener('click', () => {
+                    this.takeScreenshot();
+                });
+                
+                // Random preset button
+                document.getElementById('presetBtn').addEventListener('click', () => {
+                    this.randomizeParameters();
+                });
+                
+                // Bell state button
+                document.getElementById('bellBtn').addEventListener('click', () => {
+                    this.createBellState();
+                });
+                
+                // Parameter sliders
+                document.getElementById('tensionSlider').addEventListener('input', (e) => {
+                    this.stringTension = parseFloat(e.target.value);
+                    document.getElementById('tensionValue').textContent = this.stringTension.toFixed(1);
+                });
+                
+                document.getElementById('radiusSlider').addEventListener('input', (e) => {
+                    this.compactRadius = parseFloat(e.target.value);
+                    document.getElementById('radiusValue').textContent = this.compactRadius.toFixed(1);
+                });
+                
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.evolutionSpeed = parseFloat(e.target.value);
+                    document.getElementById('speedValue').textContent = this.evolutionSpeed.toFixed(1);
+                });
+                
+                document.getElementById('thresholdSlider').addEventListener('input', (e) => {
+                    this.quantumThreshold = parseFloat(e.target.value);
+                    document.getElementById('thresholdValue').textContent = this.quantumThreshold.toFixed(2);
+                });
+                
+                document.getElementById('harmonicsSlider').addEventListener('input', (e) => {
+                    this.numHarmonics = parseInt(e.target.value);
+                    document.getElementById('harmonicsValue').textContent = this.numHarmonics;
+                    this.initializeStringField(); // Reinitialize with new harmonics
+                });
+                
+                // Mode button
+                document.getElementById('modeBtn').addEventListener('click', (e) => {
+                    const modes = ['Quantum Particles', 'Energy Density', 'Phase Visualization', 'Interference Pattern'];
+                    let currentMode = parseInt(e.target.dataset.mode || '0');
+                    currentMode = (currentMode + 1) % modes.length;
+                    e.target.dataset.mode = currentMode;
+                    e.target.textContent = modes[currentMode];
+                });
+                
+                // Window resize
+                window.addEventListener('resize', () => this.resize());
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key.toLowerCase()) {
+                        case ' ':
+                            e.preventDefault();
+                            document.getElementById('toggleBtn').click();
+                            break;
+                        case 'r':
+                            document.getElementById('resetBtn').click();
+                            break;
+                        case 's':
+                            document.getElementById('screenshotBtn').click();
+                            break;
+                        case 'q':
+                            this.randomizeParameters();
+                            break;
+                        case 'b':
+                            this.createBellState();
+                            break;
+                    }
+                });
+            }
+            
+            reset() {
+                this.time = 0.0;
+                this.stringComHistory = [];
+                this.particleHistory = [];
+                this.energyHistory = [];
+                this.tunnelingEvents = 0;
+                this.phaseTransitions = 0;
+                this.sphereEvents = 0;
+                this.toroidEvents = 0;
+                
+                this.initializeStringField();
+                this.updateStatus('🔄 Quantum System Reset - Ready for New Evolution!');
+            }
+            
+            randomizeParameters() {
+                this.stringTension = 0.5 + Math.random() * 7.0;
+                this.compactRadius = 2.0 + Math.random() * 8.0;
+                this.quantumThreshold = 0.2 + Math.random() * 0.6;
+                this.numHarmonics = 2 + Math.floor(Math.random() * 6);
+                
+                // Update UI
+                document.getElementById('tensionSlider').value = this.stringTension;
+                document.getElementById('tensionValue').textContent = this.stringTension.toFixed(1);
+                document.getElementById('radiusSlider').value = this.compactRadius;
+                document.getElementById('radiusValue').textContent = this.compactRadius.toFixed(1);
+                document.getElementById('thresholdSlider').value = this.quantumThreshold;
+                document.getElementById('thresholdValue').textContent = this.quantumThreshold.toFixed(2);
+                document.getElementById('harmonicsSlider').value = this.numHarmonics;
+                document.getElementById('harmonicsValue').textContent = this.numHarmonics;
+                
+                this.initializeStringField();
+                this.updateStatus('🎲 Random Quantum Parameters Set!');
+            }
+            
+            createBellState() {
+                // Create entangled-like initial conditions
+                for (let i = 0; i < this.stringSize; i++) {
+                    const x = (i / this.stringSize) * 2.0 * Math.PI;
+                    
+                    // Bell state analog: superposition of correlated modes
+                    const real = Math.sin(x) + Math.sin(2*x) * 0.7;
+                    const imag = Math.cos(x) + Math.cos(2*x) * 0.7;
+                    
+                    // Add quantum correlation
+                    const correlation = Math.sin(x/2) * Math.cos(x/2);
+                    
+                    this.stringField[i * 2] = (real + correlation) / Math.sqrt(2);
+                    this.stringField[i * 2 + 1] = (imag + correlation) / Math.sqrt(2);
+                    this.stringFieldPrev[i * 2] = this.stringField[i * 2];
+                    this.stringFieldPrev[i * 2 + 1] = this.stringField[i * 2 + 1];
+                }
+                
+                this.updateStatus('⚛️ Bell-like Quantum State Created!');
+            }
+            
+            takeScreenshot() {
+                const link = document.createElement('a');
+                link.download = `enhanced_braneworld_${Date.now()}.png`;
+                link.href = this.canvas.toDataURL();
+                link.click();
+                this.updateStatus('📸 Quantum Screenshot Captured!');
+            }
+            
+            resize() {
+                const container = this.canvas.parentElement;
+                this.canvas.width = container.offsetWidth;
+                this.canvas.height = container.offsetHeight;
+                
+                if (this.gl) {
+                    this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+                }
+            }
+            
+            updateStatus(message) {
+                const indicator = this.isRunning ? 'status-running' : 'status-paused';
+                document.getElementById('systemStatus').innerHTML = 
+                    `<span class="status-indicator ${indicator}"></span>${message}`;
+                
+                const stats = `
+                    Resolution: ${this.projSize}³ | 
+                    Particles: ${this.particleCount.toLocaleString()} | 
+                    FPS: ~60 | 
+                    Harmonics: ${this.numHarmonics} |
+                    WebGL: Enhanced
+                `;
+                document.getElementById('realTimeStats').textContent = stats;
+                
+                // Show quantum events
+                const quantumStatus = `
+                    🌀 Recent Events: ${this.tunnelingEvents % 100} tunnels, 
+                    ${this.sphereEvents} spheres, ${this.toroidEvents} toroids
+                `;
+                document.getElementById('quantumEvents').textContent = quantumStatus;
+            }
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            const simulator = new EnhancedBraneWorldWebGL();
+            
+            // Auto-start after brief delay
+            setTimeout(() => {
+                if (!simulator.isRunning) {
+                    document.getElementById('toggleBtn').click();
+                }
+            }, 1500);
+            
+            // Global access for debugging
+            window.enhancedBraneWorld = simulator;
+            
+            // Show initial status
+            console.log('🌌 Enhanced Brane-World WebGL Ready!');
+            console.log('🎮 Keyboard shortcuts: Space=play/pause, R=reset, S=screenshot, Q=random, B=bell state');
+        });
+    </script>
+</body>
+</html>
